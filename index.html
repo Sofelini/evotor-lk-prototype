@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Эвотор — ЛК заявки</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: prototype bar → brand header → [sidebar | flow card], mobile collapses sidebar into summary + sticky footer */
+:root{
+  --or:#F26A1B; --or-d:#DC5A0E; --orl:#FFF1E8; --ord:#F9C9AC;
+  --tx:#1C1C1E; --t2:#6B6F76; --t3:#9A9EA6;
+  --bg:#F4F5F7; --card:#FFFFFF; --ln:#E4E6EA; --dz:#FAFAFB; --cb:#C9CDD3;
+  --ok:#1FA463; --okl:#E8F7EF; --er:#E53935; --erl:#FDECEC;
+  --proto:#24262B; --proto-t:#C9CCD3;
+  --font:"Inter",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--font);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible,input:focus-visible,.tile:focus-visible,.drop:focus-visible{outline:3px solid var(--ord);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* prototype bar */
+.pbar{background:var(--proto);color:var(--proto-t);font-size:13px}
+.pbar .in{max-width:1320px;margin:0 auto;display:flex;gap:16px;align-items:center;padding-block:8px;flex-wrap:wrap}
+.pbar b{color:#fff;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:11px}
+.pbar .grp{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.pbar button{padding:4px 9px;border-radius:6px;background:#33363D;color:#E6E8EC;font-size:12px}
+.pbar button.on{background:var(--or);color:#fff}
+.pbar button:hover{background:#40444C}.pbar button.on:hover{background:var(--or-d)}
+
+/* header */
+.hdr{background:var(--card);border-bottom:1px solid var(--ln)}
+.hdr .in{max-width:1320px;margin:0 auto;height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{font-weight:800;font-size:25px;letter-spacing:-.5px;color:var(--or)}
+.brand{display:flex;align-items:center;gap:16px}
+.brand .sub{color:var(--t2);font-size:14px;padding-left:16px;border-left:1px solid var(--ln)}
+.who{display:flex;align-items:center;gap:12px;text-align:right}
+.who small{display:block;color:var(--t2);font-size:13px}
+.ava{width:40px;height:40px;border-radius:50%;background:var(--orl);color:var(--or);font-weight:700;display:grid;place-items:center;flex-shrink:0;font-size:14px}
+
+/* layout */
+.wrap{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:320px minmax(0,1fr);gap:24px;align-items:start;padding-block:32px 48px}
+.side{display:flex;flex-direction:column;gap:16px;position:sticky;top:16px}
+.main{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--card);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px}
+.h1{font-size:30px;line-height:38px;font-weight:700}
+.h2{font-size:20px;line-height:28px;font-weight:700}
+.h3{font-size:17px;font-weight:600}
+.muted{color:var(--t2)}.small{font-size:13px;line-height:18px}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px}.kv span:first-child{color:var(--t2)}.kv span:last-child{font-weight:600;font-variant-numeric:tabular-nums}
+.hr{height:1px;background:var(--ln)}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:13px;font-size:13px;font-weight:600;white-space:nowrap}
+.p-or{background:var(--orl);color:var(--or)}.p-ok{background:var(--okl);color:var(--ok)}.p-er{background:var(--erl);color:var(--er)}.p-wt{background:var(--bg);color:var(--t2)}
+.doc{display:flex;gap:12px;align-items:center}
+.ic{width:44px;height:44px;border-radius:10px;background:var(--bg);display:grid;place-items:center;flex-shrink:0}
+.ic.or{background:var(--orl)}
+.note{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:var(--bg);font-size:14px}
+.note.or{background:var(--orl)}.note.er{background:var(--erl)}.note.ok{background:var(--okl)}
+.note svg{flex-shrink:0}
+
+/* stepper */
+.steps{display:flex;gap:4px;background:var(--card);border-radius:16px;padding:8px}
+.st{flex:1;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;font-size:14px;color:var(--t3);text-align:left;min-width:0}
+.st .n{width:28px;height:28px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0}
+.st.done{color:var(--tx)}.st.done .n{background:var(--okl)}
+.st.done:hover{background:var(--bg)}
+.st.cur{background:var(--orl);color:var(--tx);font-weight:600}.st.cur .n{background:var(--or);color:#fff}
+.st[disabled]{cursor:default}
+.prog{display:none}
+
+/* form */
+.field label{display:block;font-size:13px;color:var(--t2);margin-bottom:6px}
+.inp{height:52px;border:1.5px solid var(--ln);border-radius:12px;background:var(--card);display:flex;align-items:center;gap:8px;padding:0 16px;transition:border-color .15s}
+.inp:focus-within{border-color:var(--or)}
+.inp.ro{background:var(--bg);border-color:var(--bg)}
+.inp.err{border-color:var(--er)}
+.inp input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:16px;background:transparent;color:var(--tx);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.inp input::placeholder{color:var(--t3);letter-spacing:0}
+.hint{font-size:13px;color:var(--t2);margin-top:6px}.hint.er{color:var(--er)}
+.cb{display:flex;gap:12px;align-items:flex-start;font-size:14px;text-align:left;cursor:pointer}
+.box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--cb);background:var(--card);display:grid;place-items:center;flex-shrink:0;margin-top:0;transition:.15s}
+.cb.on .box{background:var(--or);border-color:var(--or)}
+.lnk{color:var(--or);font-weight:600}
+.actions{display:flex;justify-content:space-between;gap:12px}
+.actions.end{justify-content:flex-end}
+.btn{height:52px;border-radius:12px;padding:0 28px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:600;transition:background .15s}
+.btn.p{background:var(--or);color:#fff}.btn.p:hover{background:var(--or-d)}
+.btn.p:disabled{background:var(--ord);cursor:not-allowed}
+.btn.s{background:transparent}.btn.s:hover{background:var(--card)}
+.btn.o{border:1.5px solid var(--ln);background:var(--card)}.btn.o:hover{border-color:var(--cb)}
+.btn.sm{height:40px;font-size:14px;padding:0 16px;border-radius:10px;width:100%}
+.ol{display:flex;flex-direction:column;gap:10px;font-size:14px;margin:0;padding:0;list-style:none;counter-reset:n}
+.ol li{display:flex;gap:10px;counter-increment:n}
+.ol li::before{content:counter(n);width:22px;height:22px;border-radius:50%;background:var(--orl);color:var(--or);font-size:12px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+
+/* passport */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.drop{border:1.5px dashed var(--cb);border-radius:14px;background:var(--dz);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:28px 20px;min-height:210px;width:100%;transition:.15s}
+.drop:hover{border-color:var(--or);background:var(--orl)}
+.tile{border:1.5px solid var(--ln);border-radius:14px;overflow:hidden;background:var(--card)}
+.tile.bad{border-color:var(--er)}
+.prev{height:150px;position:relative;background:linear-gradient(135deg,#EFD9D4,#E6C9C9 50%,#DCC7D6);display:flex;gap:14px;padding:48px 18px 18px}
+.prev .ph{width:70px;height:84px;border-radius:6px;background:#C9B1B5;flex-shrink:0}
+.prev .ls{display:flex;flex-direction:column;gap:10px;padding-top:6px;flex:1}
+.prev .ls i{display:block;height:8px;border-radius:4px;background:rgba(120,80,90,.3)}
+.badge{position:absolute;left:12px;top:12px;height:28px;padding:0 10px;border-radius:8px;background:var(--card);display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:600}
+.tfoot{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:14px}
+.tfoot b{flex:1;font-weight:600}
+.icbtn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center}.icbtn:hover{background:var(--bg)}
+.terr{display:flex;gap:12px;padding:14px 16px;background:var(--erl);font-size:14px}
+.loading{min-height:210px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;color:var(--t2);font-size:14px}
+.spin{animation:sp 0.9s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+
+/* files */
+.frow{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1.5px solid var(--ln);border-radius:12px}
+.frow.bad{border-color:var(--er)}
+.frow .meta{flex:1;min-width:0}.frow .meta b{display:block;font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.bar{height:8px;border-radius:4px;background:var(--bg);overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);transition:width .4s}
+
+/* sign */
+.drow{display:flex;align-items:center;gap:14px;padding:12px 16px;border:1.5px solid var(--ln);border-radius:12px;font-weight:600;font-size:14px}
+.drow span{flex:1}
+.code{display:flex;gap:10px}
+.code input{width:52px;height:60px;border-radius:12px;border:1.5px solid var(--ln);text-align:center;font:inherit;font-size:24px;font-weight:700;outline:0;background:var(--card);color:var(--tx)}
+.code input:focus{border-color:var(--or)}.code.err input{border-color:var(--er)}
+
+/* result */
+.hero{align-items:center;text-align:center;padding:64px 40px;gap:16px}
+.circ{width:96px;height:96px;border-radius:50%;display:grid;place-items:center}
+.hero p{margin:0;max-width:520px;color:var(--t2)}
+.dots{display:flex;gap:6px}.dots i{width:8px;height:8px;border-radius:50%;background:var(--or);animation:pulse 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(28,28,30,.45);display:grid;place-items:center;padding:16px;z-index:50}
+.modal .card{max-width:420px;width:100%}
+.phone{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;user-select:all}
+
+/* mobile summary */
+.msum{display:none}
+
+@media (max-width:960px){
+  .wrap{grid-template-columns:1fr;padding-block:16px 0;gap:14px}
+  .side{display:none}
+  .brand .sub,.who div{display:none}
+  .hdr .in{height:56px}.logo{font-size:22px}
+  .msum{display:block;background:var(--card);border-radius:14px}
+  .msum summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer}
+  .msum summary::-webkit-details-marker{display:none}
+  .msum[open] summary svg{transform:rotate(180deg)}
+  .msum .body{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px}
+  .h1{font-size:24px;line-height:30px}
+  .steps{display:none}
+  .prog{display:flex;flex-direction:column;gap:8px}
+  .prog .row{display:flex;justify-content:space-between;font-size:13px;color:var(--t2)}.prog .row b{color:var(--tx)}
+  .prog .bars{display:flex;gap:4px}.prog .bars i{flex:1;height:4px;border-radius:2px;background:var(--ln)}
+  .prog .bars i.d{background:var(--ok)}.prog .bars i.c{background:var(--or)}
+  .card{padding:16px;border-radius:14px;gap:14px}
+  .h2{font-size:18px;line-height:24px}
+  .tiles{grid-template-columns:1fr}
+  .drop{min-height:150px}
+  .actions{position:sticky;bottom:0;background:var(--card);flex-direction:column-reverse;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px))) 0;padding:12px max(16px,env(safe-area-inset-left,0px)) calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ln);gap:8px}
+  .actions .btn{width:100%}
+  .btn.s{background:var(--bg)}
+  .frow{align-items:flex-start;flex-wrap:wrap}
+  .frow .pill{order:3;margin-left:58px}
+  .drow .open{display:none}
+  .hero{padding:32px 16px}
+  .main{padding-bottom:16px}
+}
+/* accountant link */
+.s4{display:flex;flex-direction:column}
+.acc{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:16px;border-radius:14px;border:1.5px solid var(--ln);flex-wrap:wrap}
+.acc .txt{display:flex;gap:12px;align-items:flex-start;flex:1;min-width:240px}
+.acc .btn.sm{width:auto}
+.acc.sent{border-color:var(--okl);background:var(--okl);flex-direction:column;align-items:stretch}
+.acc .ops{display:flex;gap:8px;flex-wrap:wrap}
+.acc .ops .btn.sm{background:var(--card);border:1.5px solid var(--ln)}
+.mob-only{display:none}
+.seg{display:flex;background:var(--bg);border-radius:10px;padding:4px;gap:4px}
+.seg button{flex:1;height:36px;border-radius:8px;font-size:14px;font-weight:600;color:var(--t2)}
+.seg button.on{background:var(--card);color:var(--tx);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.preview{font-size:13px;color:var(--t2);background:var(--bg);border-radius:12px;padding:12px 14px}
+.preview b{color:var(--tx);font-weight:600}
+.linkbox{font-variant-numeric:tabular-nums;font-weight:600;user-select:all;overflow-wrap:anywhere}
+.modal .card{max-height:calc(100vh - 32px);overflow:auto}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--proto);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;max-width:calc(100% - 32px)}
+.src{color:var(--or);font-weight:600}
+body.accv .who{visibility:hidden}
+body.accv .side{display:none}
+body.accv .wrap{grid-template-columns:minmax(0,760px);justify-content:center}
+@media (max-width:960px){
+  .s4 > .h2{order:-2}
+  .s4 > .acc{order:-1;border-color:var(--or);background:var(--orl)}
+  .s4 > .acc.sent{border-color:var(--okl);background:var(--okl)}
+  .acc .btn.sm{width:100%}
+  .mob-only{display:block}
+  .desk-only{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="pbar"><div class="in gut" id="pbar"></div></div>
+<header class="hdr"><div class="in gut">
+  <div class="brand"><span class="logo">эвотор</span><span class="sub">Финансирование для бизнеса</span></div>
+  <div class="who"><div><b>ИП Смирнова А. В.</b><small>+7 (912) 345-67-12</small></div><span class="ava">АС</span></div>
+</div></header>
+<div class="wrap gut"><aside class="side" id="side"></aside><main class="main" id="main"></main></div>
+<div id="modal"></div>
+
+<script>
+const PHONE='+7 (912) 345-67-12', APP='№ 2026-11-0417';
+const STEPS=['Данные компании','Паспорт','Условия','Выписки','Подписание'];
+const DOCS=['Согласие на обработку персональных данных','Согласие на запрос в бюро кредитных историй','Договор финансирования'];
+const P={
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5" stroke="#C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
+ phone:'<path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 005.5 5.5l1.3-2 4 1.5v2.6a2 2 0 01-2.2 2A16 16 0 014.6 5.7a2 2 0 012-2.2z" stroke="#C" stroke-width="1.8" stroke-linejoin="round"/>',
+ doc:'<path d="M7 3h7l5 5v12a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#C" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="#C" stroke-width="1.8" stroke-linecap="round"/>',
+ alert:'<circle cx="12" cy="12" r="9" stroke="#C" stroke-width="1.9"/><path d="M12 7.5v5.5" stroke="#C" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.4" r="1.25" fill="#C"/>',
+ info:'<circle cx="12" cy="12" r="9" stroke="#C" stroke-width="1.9"/><path d="M12 11v6" stroke="#C" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.25" fill="#C"/>',
+ clock:'<circle cx="12" cy="12" r="9" stroke="#C" stroke-width="1.9"/><path d="M12 7v5l3.2 2" stroke="#C" stroke-width="1.9" stroke-linecap="round"/>',
+ upload:'<path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="#C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
+ trash:'<path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13" stroke="#C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+ id:'<rect x="3" y="5" width="18" height="14" rx="2" stroke="#C" stroke-width="1.8"/><circle cx="9" cy="11" r="2.2" stroke="#C" stroke-width="1.8"/><path d="M5.8 16.2c.6-1.6 1.8-2.4 3.2-2.4s2.6.8 3.2 2.4M14.5 10h4M14.5 13.5h3" stroke="#C" stroke-width="1.8" stroke-linecap="round"/>',
+ home:'<rect x="3" y="5" width="18" height="14" rx="2" stroke="#C" stroke-width="1.8"/><path d="M7 14.5V11l3-2.4 3 2.4v3.5M15.5 10h3M15.5 13.5h3" stroke="#C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+ ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" stroke="#C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
+ x:'<path d="M7 7l10 10M17 7L7 17" stroke="#C" stroke-width="2.2" stroke-linecap="round"/>',
+ txt:'<path d="M7 3h7l5 5v12a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#C" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="#C" stroke-width="1.8"/><path d="M9 12.5h6M12 12.5V18" stroke="#C" stroke-width="1.8" stroke-linecap="round"/>',
+ spin:'<circle cx="12" cy="12" r="8.5" stroke="#E4E6EA" stroke-width="2.4"/><path d="M12 3.5a8.5 8.5 0 018.5 8.5" stroke="#C" stroke-width="2.4" stroke-linecap="round"/>',
+ send:'<path d="M20.5 3.5L10 14M20.5 3.5l-6.5 17-4-6.5-6.5-4z" stroke="#C" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2" stroke="#C" stroke-width="1.8"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3" stroke="#C" stroke-width="1.8"/>',
+ laptop:'<rect x="4" y="5" width="16" height="11" rx="1.5" stroke="#C" stroke-width="1.8"/><path d="M2 19h20" stroke="#C" stroke-width="1.8" stroke-linecap="round"/>',
+ chev:'<path d="M7 10l5 5 5-5" stroke="#C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+};
+const COL={or:'#F26A1B',ok:'#1FA463',er:'#E53935',t2:'#6B6F76',t3:'#9A9EA6',tx:'#1C1C1E',w:'#FFFFFF'};
+const ic=(n,s=20,c='tx',cls='')=>`<svg class="${cls}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" aria-hidden="true">${P[n].replace(/#C/g,COL[c]||c)}</svg>`;
+
+const init=()=>({step:1,maxStep:1,phase:'form',outcome:'ok',
+ inn:'',innSt:'idle',c1:false,c2:false,
+ pass:{main:'empty',reg:'empty'},mainTries:0,
+ files:[],round:0,
+ agree:true,codeSent:false,code:['','','',''],codeErr:'',timer:0,signed:false,
+ view:'client',acc:{sent:false,ch:'sms',contact:'',name:'',err:''},accFiles:[],accRound:0,accDone:false});
+const ACC_LINK='credit.evotor.ru/s/7KQ2M9';
+let s=init(), focusId=null, timers=[];
+const later=(fn,ms)=>{const t=setTimeout(()=>{fn();render();},ms);timers.push(t);};
+const clearTimers=()=>{timers.forEach(clearTimeout);timers=[];clearInterval(tick);};
+let tick=null;
+
+/* ---------- helpers ---------- */
+const stepOk={
+ 1:()=>s.innSt==='found'&&s.c1&&s.c2,
+ 2:()=>s.pass.main==='ok'&&s.pass.reg==='ok',
+ 3:()=>true,
+ 4:()=>s.files.length>0&&s.files.every(f=>f.st==='ok'),
+ 5:()=>s.signed
+};
+function go(n){s.step=n;s.maxStep=Math.max(s.maxStep,n);s.phase='form';window.scrollTo({top:0,behavior:'smooth'});render();}
+function status(){return s.phase==='wait'?['На рассмотрении','p-wt']:s.phase==='ok'?['Выдано','p-ok']:s.phase==='no'?['Отказ','p-er']:['Оформление','p-or'];}
+
+/* ---------- sidebar ---------- */
+function sideHTML(){const [st,cl]=status();
+ const docs=s.signed?DOCS.map(d=>`<div class="doc"><span class="ic">${ic('doc',20,'or')}</span><div><div style="font-weight:600;font-size:14px">${d}</div><div class="small" style="color:var(--ok)">Подписан</div></div></div>`).join('')
+  :`<div class="note">${ic('doc',20,'t3')}<span class="muted">Здесь появятся подписанные документы по заявке</span></div>`;
+ return `<div class="card"><div class="kv" style="align-items:center"><span class="h3" style="color:var(--tx)">Заявка</span><span class="pill ${cl}">${st}</span></div>
+ <div class="small muted">${APP}</div><div class="hr"></div>
+ <div class="kv"><span>Сумма</span><span>1 500 000 ₽</span></div><div class="kv"><span>Срок</span><span>12 месяцев</span></div><div class="kv"><span>Телефон</span><span>${PHONE}</span></div></div>
+ <div class="card"><div class="h3">Документы</div>${docs}</div>
+ <div class="card" style="gap:12px"><div class="doc"><span class="ava">ИК</span><div><b>Ирина Ковалёва</b><div class="small muted">Ваш менеджер</div></div></div>
+ <button class="btn o sm" data-a="contact">${ic('phone',18)} Связаться с менеджером</button></div>`;}
+
+function msumHTML(){const [st,cl]=status();
+ return `<details class="msum"><summary><div><div class="small muted">Заявка ${APP}</div><b>1 500 000 ₽ · 12 мес.</b></div>${ic('chev',22,'t2')}</summary>
+ <div class="body"><div class="kv"><span>Статус</span><span class="pill ${cl}">${st}</span></div><div class="kv"><span>Телефон</span><span>${PHONE}</span></div>
+ ${s.signed?`<div class="kv"><span>Документы</span><span>Подписано: ${DOCS.length}</span></div>`:''}
+ <button class="btn o sm" data-a="contact">${ic('phone',18)} Связаться с менеджером — Ирина</button></div></details>`;}
+
+function stepperHTML(){const done=s.phase!=='form';
+ const d=STEPS.map((t,i)=>{const n=i+1;const isDone=done||n<s.step||(n<=s.maxStep&&n!==s.step&&stepOk[n]());const cur=!done&&n===s.step;
+  const can=!done&&!cur&&n<=s.maxStep;
+  return `<button class="st ${cur?'cur':isDone?'done':''}" ${can?`data-go="${n}"`:'disabled'}><span class="n">${isDone&&!cur?ic('check',16,'ok'):n}</span><span>${t}</span></button>`;}).join('');
+ const bars=STEPS.map((t,i)=>`<i class="${done||i+1<s.step?'d':i+1===s.step?'c':''}"></i>`).join('');
+ return `<nav class="steps" aria-label="Шаги">${d}</nav>${done?'':`<div class="prog"><div class="row"><span>Шаг ${s.step} из 5</span><b>${STEPS[s.step-1]}</b></div><div class="bars">${bars}</div></div>`}`;}
+
+function actions(label,enabled,back=true,act='next'){return `<div class="actions ${back?'':'end'}">${back?`<button class="btn s" data-a="back">Назад</button>`:''}<button class="btn p" data-a="${act}" ${enabled?'':'disabled'}>${label}</button></div>`;}
+
+/* ---------- step 1 ---------- */
+function s1(){const st=s.innSt;
+ const right=st==='checking'?ic('spin',20,'or','spin'):st==='found'?ic('check',20,'ok'):(st==='notfound'||st==='invalid')?ic('alert',20,'er'):'';
+ const hint=st==='notfound'?`<div class="hint er">Не нашли организацию с таким ИНН. Проверьте номер или свяжитесь с менеджером.</div>`
+  :st==='invalid'?`<div class="hint er">ИНН содержит 10 цифр для ООО или 12 для ИП</div>`
+  :st==='found'?'':`<div class="hint">Для ИП — 12 цифр, для ООО — 10 цифр. Для проверки ошибки введите 0000000000</div>`;
+ const found=st==='found'?`<div class="note ok">${ic('check',20,'ok')}<div><b>ИП Смирнова Анна Викторовна</b><div class="small muted">ОГРНИП 321774600123456 · Москва · действующий</div></div></div>`:'';
+ const cb=(k,txt,l)=>`<button class="cb ${s[k]?'on':''}" data-a="toggle" data-k="${k}" role="checkbox" aria-checked="${s[k]}"><span class="box">${s[k]?ic('check',14,'w'):''}</span><span>${txt} <span class="lnk">${l}</span></span></button>`;
+ return `<section class="card"><h2 class="h2">Проверьте телефон и укажите ИНН</h2>
+ <div class="field"><label>Телефон</label><div class="inp ro"><input value="${PHONE}" readonly aria-label="Телефон">${ic('check',20,'ok')}</div><div class="hint">Номер из заявки. На него придёт код для подписания документов</div></div>
+ <div class="field"><label for="inn">ИНН организации или ИП</label><div class="inp ${st==='notfound'||st==='invalid'?'err':''}"><input id="inn" inputmode="numeric" maxlength="12" placeholder="Введите 10 или 12 цифр" value="${s.inn}" autocomplete="off">${right}</div>${hint}</div>
+ ${found}</section>
+ <section class="card" style="gap:12px">${cb('c1','Даю согласие на','обработку персональных данных')}${cb('c2','Принимаю условия','пользовательского соглашения')}</section>
+ ${actions('Продолжить',stepOk[1](),false)}`;}
+
+/* ---------- step 2 ---------- */
+function tile(k){const main=k==='main',v=s.pass[k];const title=main?'Главная страница':'Страница с регистрацией';
+ if(v==='empty')return `<button class="drop" data-a="upload" data-k="${k}"><span class="ic or">${ic(main?'id':'home',22,'or')}</span><b style="font-size:15px">${title}</b><span class="small muted">${main?'Разворот с фото и ФИО':'Актуальный штамп о регистрации'}</span><span class="lnk" style="display:inline-flex;gap:6px;align-items:center;font-size:14px">${ic('upload',16,'or')} Загрузить фото или PDF</span></button>`;
+ if(v==='loading')return `<div class="tile"><div class="loading">${ic('spin',28,'or','spin')}Распознаём документ…</div></div>`;
+ const ok=v==='ok';
+ return `<div class="tile ${ok?'':'bad'}"><div class="prev"><span class="ph"></span><span class="ls"><i style="width:80%"></i><i style="width:60%"></i><i style="width:70%"></i><i style="width:40%"></i></span>
+ <span class="badge" style="color:var(--${ok?'ok':'er'})">${ic(ok?'check':'alert',16,ok?'ok':'er')} ${ok?'Загружено':'Не удалось распознать'}</span></div>
+ <div class="tfoot"><b>${title}</b><span class="small muted">passport_${main?1:2}.jpg</span><button class="icbtn" data-a="rmpass" data-k="${k}" aria-label="Удалить">${ic('trash',18,'t3')}</button></div>
+ ${ok?'':`<div class="terr">${ic('alert',20,'er')}<div><b>Загрузите фото ещё раз</b><div class="small">Изображение размыто или есть блики — не видно серию и номер паспорта</div><button class="lnk small" style="margin-top:6px" data-a="upload" data-k="${k}">Загрузить заново</button></div></div>`}</div>`;}
+function s2(){return `<section class="card"><h2 class="h2">Загрузите паспорт руководителя</h2><div class="tiles">${tile('main')}${tile('reg')}</div>
+ <ol class="ol"><li>Фото или скан в хорошем качестве — без бликов и размытия, JPG, PNG или PDF до 10 МБ</li><li>Разворот целиком: должны читаться серия, номер и дата выдачи</li><li>Если в паспорте нет страницы с регистрацией — загрузите главную страницу ещё раз</li></ol></section>
+ ${actions('Продолжить',stepOk[2]())}`;}
+
+/* ---------- step 3 ---------- */
+function s3(){const t=(k,v)=>`<div style="background:var(--bg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px"><span class="small muted">${k}</span><b style="font-size:24px;line-height:30px;font-variant-numeric:tabular-nums">${v}</b></div>`;
+ return `<section class="card"><div><h2 class="h2">Проверьте условия</h2><div class="small muted" style="margin-top:4px">Параметры согласованы с менеджером по телефону</div></div>
+ <div style="display:flex;gap:16px;flex-wrap:wrap">${t('Сумма','1 500 000 ₽')}${t('Срок','12 месяцев')}${t('Цель','Оборотные средства')}</div>
+ <div class="note">${ic('info',20,'t2')}<span>Ставку и график платежей пришлём вместе с решением по заявке. Итоговые условия будут в договоре на шаге «Подписание».</span></div>
+ <div class="note or">${ic('phone',20,'or')}<span>Хотите изменить сумму или срок? <button class="lnk" data-a="contact">Свяжитесь с менеджером</button> — он обновит параметры, и они появятся здесь.</span></div></section>
+ ${actions('Всё верно, продолжить',true)}`;}
+
+/* ---------- step 4 ---------- */
+function frow(f,rm='rmfile'){const m={ok:['p-ok','check','ok','Принята'],wait:['p-wt','spin','or','Проверяем'],err:['p-er','alert','er','Не тот формат']}[f.st];
+ return `<div class="frow ${f.st==='err'?'bad':''}"><span class="ic">${ic('txt',22,f.st==='err'?'er':'or')}</span><div class="meta"><b>${f.name}</b><span class="small muted">${f.meta}</span>${f.src==='acc'?`<div class="small src">Загрузил бухгалтер</div>`:''}</div>
+ <span class="pill ${m[0]}">${ic(m[1],14,m[2],m[1]==='spin'?'spin':'')} ${m[3]}</span><button class="icbtn" data-a="${rm}" data-id="${f.id}" aria-label="Удалить файл">${ic('trash',18,'t3')}</button></div>`;}
+function accBlock(){const a=s.acc;
+ if(!a.sent)return `<div class="acc"><div class="txt"><span class="ic or">${ic('send',22,'or')}</span><div><b>Выписки у бухгалтера?</b>
+  <div class="small muted desk-only">Отправьте ему ссылку — он загрузит выгрузку из 1С сам. По ссылке доступна только загрузка выписок, без данных заявки.</div>
+  <div class="small muted mob-only">Отправьте ссылку бухгалтеру — или себе на почту, чтобы открыть на компьютере.</div></div></div>
+  <button class="btn p sm" data-a="accform">${ic('send',18,'w')} Отправить ссылку</button></div>`;
+ const n=s.files.filter(f=>f.src==='acc').length;
+ const who=a.name?`бухгалтеру ${a.name}`:'бухгалтеру';
+ return `<div class="acc sent"><div class="txt"><span class="ic" style="background:var(--card)">${ic('check',22,'ok')}</span><div><b>${a.ch==='link'?'Ссылка для бухгалтера готова':'Ссылка отправлена '+who}</b>
+  <div class="small muted">${a.ch==='link'?`Вы скопировали ссылку <span class="linkbox">${ACC_LINK}</span> — перешлите её удобным способом`:(a.ch==='sms'?'SMS на ':'Письмо на ')+a.contact} · действует 72 часа</div>
+  <div class="small" style="margin-top:6px">${n?`<span class="pill p-ok">${ic('check',14,'ok')} Бухгалтер загрузил файлов: ${n}</span>`:'Ждём выписки. Страницу можно закрыть — пришлём SMS, когда бухгалтер загрузит файлы.'}</div></div></div>
+  <div class="ops"><button class="btn sm" data-a="copylink">${ic('copy',16)} Скопировать ссылку</button><button class="btn sm" data-a="accform">Изменить получателя</button><button class="btn sm" data-a="accrevoke">Отозвать ссылку</button></div></div>`;}
+function s4(){const ok=stepOk[4]();const months=s.files.some(f=>f.st==='ok')?12:0;
+ const cov=s.files.length?`<div style="display:flex;flex-direction:column;gap:8px"><div class="kv"><span style="color:var(--tx);font-weight:600">Период выписок</span><span style="color:var(--${months===12?'ok':'t2'})">${months} из 12 месяцев</span></div><div class="bar"><i style="width:${months/12*100}%"></i></div><span class="small muted">Загрузите выписки по всем расчётным счетам, через которые проходит выручка</span></div>`:'';
+ const errNote=s.files.some(f=>f.st==='err')?`<div class="note er">${ic('alert',20,'er')}<span>Удалите файл с ошибкой формата и загрузите выписку в TXT из 1С, XLSX или PDF.</span></div>`:'';
+ return `<section class="card s4"><h2 class="h2">Загрузите выписки по счетам</h2>
+ <div class="note or" style="flex-direction:column;gap:10px"><div style="display:flex;gap:10px;align-items:center">${ic('info',20,'or')}<b>Как выгрузить выписку из 1С</b></div>
+ <ol class="ol"><li>Банк и касса → Банковские выписки → Ещё → Выгрузить</li><li>Выберите расчётный счёт и период — последние 12 месяцев</li><li>Сохраните файл формата 1CClientBankExchange (.txt) и загрузите сюда</li></ol></div>
+ <button class="drop" data-a="addfiles" style="min-height:0"><span class="ic or">${ic('upload',22,'or')}</span><b style="font-size:15px" class="desk-only">Перетащите файлы или <span class="lnk">выберите на компьютере</span></b><b style="font-size:15px" class="mob-only lnk">Выбрать файлы на телефоне</b><span class="small muted">TXT из 1С, XLSX или PDF из банка · можно несколько файлов · по каждому расчётному счёту</span></button>
+ ${accBlock()}
+ ${s.files.length?`<div style="display:flex;flex-direction:column;gap:10px">${s.files.map(f=>frow(f)).join('')}</div>`:''}${errNote}${cov}</section>
+ ${actions('Продолжить',ok)}`;}
+
+/* ---------- step 5 ---------- */
+function s5(){const docs=DOCS.map(d=>`<div class="drow"><span class="ic" style="width:40px;height:40px">${ic('doc',20,'or')}</span><span>${d}</span><button class="lnk" data-a="opendoc" style="display:inline-flex;gap:6px;align-items:center"><span class="open">Открыть</span>${ic('ext',16,'or')}</button></div>`).join('');
+ let act,btn;
+ if(!s.codeSent){act=`<button class="cb ${s.agree?'on':''}" data-a="toggle" data-k="agree" role="checkbox" aria-checked="${s.agree}"><span class="box">${s.agree?ic('check',14,'w'):''}</span><span>Я ознакомился с документами и согласен с их условиями</span></button>
+  <div class="small muted">Код для подписания отправим в SMS на номер ${PHONE}</div>`;btn=actions('Получить код',s.agree,true,'sendcode');}
+ else{const full=s.code.every(Boolean);
+  act=`<div><b>Введите код из SMS</b><div class="small muted" style="margin-top:4px">Отправили на ${PHONE}. Для проверки ошибки введите 0000</div></div>
+  <div class="code ${s.codeErr?'err':''}">${s.code.map((d,i)=>`<input id="c${i}" inputmode="numeric" maxlength="1" value="${d}" aria-label="Цифра ${i+1}">`).join('')}</div>
+  ${s.codeErr?`<div class="hint er" style="margin:0">${s.codeErr}</div>`:''}
+  ${s.timer>0?`<div class="small muted">Отправить код повторно через 0:${String(s.timer).padStart(2,'0')}</div>`:`<button class="lnk small" style="text-align:left" data-a="resend">Отправить код повторно</button>`}`;
+  btn=actions('Подписать',full,true,'sign');}
+ return `<section class="card"><div><h2 class="h2">Подпишите документы</h2><div class="small muted" style="margin-top:4px">Простая электронная подпись — код из SMS</div></div>
+ <div style="display:flex;flex-direction:column;gap:10px">${docs}</div><div class="hr"></div>${act}</section>${btn}`;}
+
+/* ---------- results ---------- */
+function result(){const m={wait:['var(--orl)','clock','or','Заявка на рассмотрении','Документы подписаны и переданы на проверку. Обычно решение принимаем в течение 1 рабочего дня.'],
+ ok:['var(--okl)','check','ok','Деньги отправлены','1 500 000 ₽ перечислены на расчётный счёт •• 4417 в Сбербанке. Зачисление — до 1 рабочего дня.'],
+ no:['var(--erl)','x','er','Не можем одобрить заявку','Сейчас мы не готовы выдать финансирование на этих условиях. Менеджер свяжется с вами и расскажет, какие есть варианты.']}[s.phase];
+ const extra=s.phase==='wait'?`<div class="dots"><i></i><i></i><i></i></div><div class="note" style="text-align:left;max-width:520px">${ic('phone',20,'t2')}<span>Пришлём SMS с решением на ${PHONE}. Эту страницу можно закрыть.</span></div><div class="small muted">В прототипе решение придёт через несколько секунд — исход выбирается в верхней панели.</div>`
+  :s.phase==='ok'?`<button class="btn p" data-a="opendoc">Скачать договор и график</button>`
+  :`<button class="btn o" data-a="contact">${ic('phone',18)} Связаться с менеджером</button>`;
+ return `<section class="card hero"><div class="circ" style="background:${m[0]}">${ic(m[1],44,m[2])}</div><h2 class="h2" style="font-size:26px;line-height:32px">${m[3]}</h2><p>${m[4]}</p>${extra}</section>`;}
+
+/* ---------- accountant view ---------- */
+function accView(){
+ if(s.accDone)return `<section class="card hero"><div class="circ" style="background:var(--okl)">${ic('check',44,'ok')}</div><h2 class="h2" style="font-size:26px;line-height:32px">Выписки переданы</h2>
+  <p>Анна Смирнова получит уведомление и продолжит оформление заявки. Эту страницу можно закрыть.</p></section>`;
+ const ok=s.accFiles.length>0&&s.accFiles.every(f=>f.st==='ok');
+ const err=s.accFiles.some(f=>f.st==='err')?`<div class="note er">${ic('alert',20,'er')}<span>Удалите файл с ошибкой формата и загрузите выписку в TXT из 1С, XLSX или PDF.</span></div>`:'';
+ return `<section class="card"><span class="pill p-or" style="align-self:flex-start">Запрос от ИП Смирнова А. В.</span>
+ <div><h1 class="h1" style="font-size:26px;line-height:32px">Загрузите выписки по счетам</h1>
+ <p class="muted" style="margin:8px 0 0">Анна Смирнова оформляет финансирование для бизнеса в Эвотор и просит выгрузить выписки из 1С за последние 12 месяцев по всем расчётным счетам.</p></div>
+ <div class="note">${ic('clock',20,'t2')}<span>Ссылка действует до 9 ноября, 13:55. По ней доступна только загрузка выписок — данные заявки и документы клиента здесь не показываются.</span></div>
+ <div class="note or" style="flex-direction:column;gap:10px"><div style="display:flex;gap:10px;align-items:center">${ic('info',20,'or')}<b>Как выгрузить выписку из 1С</b></div>
+ <ol class="ol"><li>Банк и касса → Банковские выписки → Ещё → Выгрузить</li><li>Выберите расчётный счёт и период — последние 12 месяцев</li><li>Сохраните файл формата 1CClientBankExchange (.txt) и загрузите сюда</li></ol></div>
+ <button class="drop" data-a="accadd" style="min-height:0"><span class="ic or">${ic('upload',22,'or')}</span><b style="font-size:15px">Перетащите файлы или <span class="lnk">выберите на компьютере</span></b><span class="small muted">TXT из 1С, XLSX или PDF из банка · можно несколько файлов</span></button>
+ ${s.accFiles.length?`<div style="display:flex;flex-direction:column;gap:10px">${s.accFiles.map(f=>frow(f,'rmaccfile')).join('')}</div>`:''}${err}</section>
+ <div class="actions end"><button class="btn p" data-a="accsend" ${ok?'':'disabled'}>Передать выписки</button></div>`;}
+function accAdd(){s.accRound++;
+ if(s.accRound===1){s.accFiles.push({id:11,name:'kl_to_1c_sber.txt',meta:'Сбербанк · счёт •• 4417 · 01.11.2025 – 31.10.2026',st:'wait',src:'acc'},{id:12,name:'kl_to_1c_tochka.txt',meta:'Точка · счёт •• 9023 · 01.11.2025 – 31.10.2026',st:'wait',src:'acc'});
+  later(()=>{s.accFiles.forEach(f=>{if(f.st==='wait')f.st='ok';});},1200);}
+ else{const id=Date.now();s.accFiles.push({id,name:'kl_to_1c_alfa.txt',meta:'Альфа-Банк · счёт •• 1180 · 01.11.2025 – 31.10.2026',st:'wait',src:'acc'});later(()=>{const f=s.accFiles.find(f=>f.id===id);if(f)f.st='ok';},900);}}
+
+/* ---------- accountant link form ---------- */
+function showAccForm(){const a=s.acc,sms=a.ch==='sms';
+ const name=a.name||'бухгалтеру';
+ modal(`<form id="accForm" style="display:flex;flex-direction:column;gap:14px" novalidate>
+ <div><h2 class="h2">Ссылка для загрузки выписок</h2><div class="small muted" style="margin-top:4px">Получатель увидит только форму загрузки выписок по этой заявке. Данные заявки и паспорт ему не видны.</div></div>
+ <div class="seg" role="tablist"><button type="button" data-ch="sms" class="${sms?'on':''}">SMS</button><button type="button" data-ch="email" class="${sms?'':'on'}">Email</button></div>
+ <div class="field"><label for="accContact">${sms?'Телефон получателя':'Email получателя'}</label><div class="inp ${a.err?'err':''}"><input id="accContact" ${sms?'inputmode="tel" placeholder="+7 (900) 000-00-00"':'inputmode="email" placeholder="buh@company.ru"'} value="${a.contact}" autocomplete="off"></div>
+  ${a.err?`<div class="hint er">${a.err}</div>`:`<div class="hint">${sms?'Можно указать свой номер':'Можно указать свою почту'}, чтобы открыть ссылку на компьютере</div>`}</div>
+ <div class="field"><label for="accName">Имя получателя — необязательно</label><div class="inp"><input id="accName" placeholder="Например, Ольга" value="${a.name}" autocomplete="off"></div></div>
+ <div class="preview">Текст сообщения: <b>«Здравствуйте! Анна Смирнова просит загрузить выписки из 1С для заявки на финансирование в Эвотор: ${ACC_LINK}»</b></div>
+ <button type="submit" class="btn p">${ic('send',18,'w')} Отправить</button>
+ <button type="button" class="btn o" data-a="copylink">${ic('copy',18)} Скопировать ссылку и отправить самому</button>
+ </form>`);
+ setTimeout(()=>document.getElementById('accContact')?.focus(),0);}
+function saveDraft(){const c=document.getElementById('accContact'),n=document.getElementById('accName');if(c)s.acc.contact=c.value;if(n)s.acc.name=n.value.trim();}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+function copyLink(){const url='https://'+ACC_LINK;
+ const done=()=>toast('Ссылка скопирована: '+ACC_LINK);
+ try{navigator.clipboard.writeText(url).then(done,()=>toast('Ссылка: '+ACC_LINK));}catch(e){toast('Ссылка: '+ACC_LINK);}}
+
+/* ---------- prototype bar ---------- */
+function pbarHTML(){const jump=[1,2,3,4,5].map(n=>`<button data-a="jump" data-n="${n}" class="${s.phase==='form'&&s.step===n?'on':''}">${n}</button>`).join('');
+ return `<b>Прототип</b><span class="grp">Экран: <button data-a="view" data-v="client" class="${s.view==='client'?'on':''}">Клиент</button><button data-a="view" data-v="acc" class="${s.view==='acc'?'on':''}">Бухгалтер по ссылке</button></span><span class="grp">Шаг: ${jump}<button data-a="jumpres" class="${s.phase!=='form'?'on':''}">Итог</button></span>
+ <span class="grp">Решение: <button data-a="outcome" data-v="ok" class="${s.outcome==='ok'?'on':''}">Одобрить</button><button data-a="outcome" data-v="no" class="${s.outcome==='no'?'on':''}">Отказать</button></span>
+ <span class="grp"><button data-a="reset">Начать заново</button></span>`;}
+
+/* ---------- render ---------- */
+function render(){
+ document.getElementById('pbar').innerHTML=pbarHTML();
+ document.body.classList.toggle('accv',s.view==='acc');
+ if(s.view==='acc'){document.getElementById('side').innerHTML='';document.getElementById('main').innerHTML=accView();return;}
+ document.getElementById('side').innerHTML=sideHTML();
+ const title=s.phase==='form'?'Оформление заявки':'Заявка '+APP;
+ const body=s.phase!=='form'?result():[s1,s2,s3,s4,s5][s.step-1]();
+ const open=document.querySelector('.msum')?.open;
+ document.getElementById('main').innerHTML=msumHTML()+`<h1 class="h1">${title}</h1>`+stepperHTML()+body;
+ if(open)document.querySelector('.msum').open=true;
+ if(focusId){const el=document.getElementById(focusId);if(el){el.focus();const v=el.value.length;try{el.setSelectionRange(v,v)}catch(e){}}focusId=null;}
+}
+
+/* ---------- logic ---------- */
+function checkInn(){const v=s.inn;
+ if(v.length===10||v.length===12){s.innSt='checking';later(()=>{if(s.inn!==v)return;s.innSt=/^0+$/.test(v)?'notfound':'found';},700);}
+ else s.innSt=v.length>12?'invalid':'idle';}
+function addFiles(){s.round++;
+ if(s.round===1){
+  s.files.push({id:1,name:'kl_to_1c_sber.txt',meta:'Сбербанк · счёт •• 4417 · 01.11.2025 – 31.10.2026',st:'wait'},{id:2,name:'kl_to_1c_tochka.txt',meta:'Точка · счёт •• 9023 · 01.11.2025 – 31.10.2026',st:'wait'},{id:3,name:'vypiska_oktyabr.docx',meta:'Файл не распознан — нужен TXT из 1С, XLSX или PDF',st:'wait'});
+  later(()=>{const f=s.files.find(f=>f.id===1);if(f)f.st='ok';const e=s.files.find(f=>f.id===3);if(e)e.st='err';},700);
+  later(()=>{const f=s.files.find(f=>f.id===2);if(f)f.st='ok';},2200);
+ }else{const id=Date.now();s.files.push({id,name:'kl_to_1c_alfa.txt',meta:'Альфа-Банк · счёт •• 1180 · 01.11.2025 – 31.10.2026',st:'wait'});later(()=>{const f=s.files.find(f=>f.id===id);if(f)f.st='ok';},900);}
+}
+function startTimer(){s.timer=59;clearInterval(tick);tick=setInterval(()=>{s.timer--;if(s.timer<=0){s.timer=0;clearInterval(tick);}const el=document.querySelector('.code');if(s.step===5&&s.codeSent&&s.phase==='form'){const f=document.activeElement?.id;render();if(f)document.getElementById(f)?.focus();}},1000);}
+function decide(){s.phase='wait';s.signed=true;later(()=>{if(s.phase==='wait')s.phase=s.outcome;},4000);}
+
+document.addEventListener('click',e=>{
+ const g=e.target.closest('[data-go]');if(g){go(+g.dataset.go);return;}
+ const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,k=b.dataset.k;
+ switch(a){
+  case 'toggle':s[k]=!s[k];break;
+  case 'next':go(s.step+1);return;
+  case 'back':go(s.step-1);return;
+  case 'upload':s.pass[k]='loading';later(()=>{if(k==='main'){s.mainTries++;s.pass.main=s.mainTries===1?'err':'ok';}else s.pass.reg='ok';},900);break;
+  case 'rmpass':s.pass[k]='empty';break;
+  case 'addfiles':addFiles();break;
+  case 'rmfile':s.files=s.files.filter(f=>String(f.id)!==b.dataset.id);break;
+  case 'sendcode':s.codeSent=true;s.code=['','','',''];s.codeErr='';focusId='c0';startTimer();break;
+  case 'resend':s.code=['','','',''];s.codeErr='';focusId='c0';startTimer();break;
+  case 'sign':if(s.code.join('')==='0000'){s.codeErr='Неверный код. Проверьте SMS и попробуйте ещё раз.';s.code=['','','',''];focusId='c0';}else{clearInterval(tick);decide();window.scrollTo({top:0,behavior:'smooth'});}break;
+  case 'accform':s.acc.err='';showAccForm();return;
+  case 'copylink':copyLink();if(document.getElementById('accForm')){saveDraft();s.acc.sent=true;s.acc.ch='link';closeModal();break;}return;
+  case 'accrevoke':s.acc.sent=false;toast('Ссылка отозвана — по ней больше нельзя загрузить файлы');break;
+  case 'view':s.view=b.dataset.v;if(s.view==='acc'){s.accDone=false;}window.scrollTo({top:0});break;
+  case 'accadd':accAdd();break;
+  case 'rmaccfile':s.accFiles=s.accFiles.filter(f=>String(f.id)!==b.dataset.id);break;
+  case 'accsend':s.accDone=true;s.files=s.files.filter(f=>f.src!=='acc').concat(s.accFiles.map(f=>Object.assign({},f)));if(!s.acc.sent){s.acc.sent=true;s.acc.ch='sms';s.acc.contact=s.acc.contact||'+7 (916) 222-33-44';}if(s.round===0)s.round=1;s.accFiles=[];s.accRound=0;break;
+  case 'contact':showContact();return;
+  case 'opendoc':showDoc();return;
+  case 'jump':clearTimers();s.phase='form';prefill(+b.dataset.n);go(+b.dataset.n);return;
+  case 'jumpres':clearTimers();prefill(6);s.step=5;s.maxStep=5;decide();break;
+  case 'outcome':s.outcome=b.dataset.v;if(s.phase==='ok'||s.phase==='no')s.phase=s.outcome;break;
+  case 'reset':clearTimers();s=init();window.scrollTo({top:0});break;
+ }
+ render();
+});
+function prefill(n){ // fill previous steps so jumping mid-flow looks consistent
+ if(n>1){s.inn='772345678912';s.innSt='found';s.c1=s.c2=true;}
+ if(n>2){s.pass={main:'ok',reg:'ok'};s.mainTries=2;}
+ if(n>4){if(!s.files.length||s.files.some(f=>f.st!=='ok')){s.files=[{id:1,name:'kl_to_1c_sber.txt',meta:'Сбербанк · счёт •• 4417 · 01.11.2025 – 31.10.2026',st:'ok'},{id:2,name:'kl_to_1c_tochka.txt',meta:'Точка · счёт •• 9023 · 01.11.2025 – 31.10.2026',st:'ok'}];s.round=1;}}
+ if(n<=5){s.signed=false;s.codeSent=false;s.code=['','','',''];s.codeErr='';}
+ s.maxStep=Math.max(s.maxStep,Math.min(n,5));
+}
+document.addEventListener('input',e=>{const t=e.target;
+ if(t.id==='inn'){s.inn=t.value.replace(/\D/g,'').slice(0,12);checkInn();focusId='inn';render();}
+ else if(/^c\d$/.test(t.id)){const i=+t.id[1];const d=t.value.replace(/\D/g,'').slice(-1);s.code[i]=d;s.codeErr='';focusId=d&&i<3?'c'+(i+1):t.id;render();}
+});
+document.addEventListener('keydown',e=>{const t=e.target;
+ if(/^c\d$/.test(t.id)&&e.key==='Backspace'&&!t.value){const i=+t.id[1];if(i>0){s.code[i-1]='';focusId='c'+(i-1);render();e.preventDefault();}}
+ if(t.classList&&t.classList.contains('drop')&&(e.key==='Enter'||e.key===' ')){}
+ if(e.key==='Escape')closeModal();
+});
+document.addEventListener('paste',e=>{const t=e.target;if(/^c\d$/.test(t.id)){const v=(e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,4);if(v){e.preventDefault();s.code=[0,1,2,3].map(i=>v[i]||'');focusId='c'+Math.min(v.length,3);render();}}});
+
+/* ---------- modals ---------- */
+function modal(html){document.getElementById('modal').innerHTML=`<div class="modal" data-close="1"><div class="card" role="dialog" aria-modal="true">${html}<button class="btn o" data-close="1">Закрыть</button></div></div>`;}
+function closeModal(){document.getElementById('modal').innerHTML='';}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.dataset.close){closeModal();return;}
+ const c=e.target.closest('[data-ch]');if(c){saveDraft();if(c.dataset.ch!==s.acc.ch){s.acc.ch=c.dataset.ch;s.acc.contact='';}s.acc.err='';showAccForm();}});
+document.getElementById('modal').addEventListener('submit',e=>{e.preventDefault();saveDraft();const a=s.acc,v=a.contact.trim();
+ if(a.ch==='sms'){const d=v.replace(/\D/g,'');if(d.length<10||d.length>12){a.err='Введите номер телефона полностью, например +7 900 000-00-00';showAccForm();return;}}
+ else if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){a.err='Проверьте email — например, buh@company.ru';showAccForm();return;}
+ a.contact=v;a.err='';a.sent=true;closeModal();toast(a.ch==='sms'?'SMS со ссылкой отправлено':'Письмо со ссылкой отправлено');render();});
+function showContact(){modal(`<div class="doc"><span class="ava">ИК</span><div><b>Ирина Ковалёва</b><div class="small muted">Ваш менеджер · пн–пт, 9:00–19:00 МСК</div></div></div>
+ <div><div class="small muted">Телефон</div><div class="phone">+7 (495) 000-00-00</div></div><div class="small muted">В реальном ЛК здесь будет кнопка звонка и запрос обратного звонка. Номер — заглушка.</div>`);}
+function showDoc(){modal(`<h2 class="h2">Просмотр документа</h2><div class="note">${ic('doc',20,'or')}<span>В рабочей версии документ откроется в новой вкладке как PDF. В прототипе файлов нет.</span></div>`);}
+
+render();
+</script>
+</body>
+</html>
